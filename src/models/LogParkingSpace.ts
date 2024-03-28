@@ -1,5 +1,4 @@
-import { Document, model, Schema } from "mongoose";
-import { parkingSpaceInterface } from "./ParkingSpace";
+import { Document, model, now, Schema } from "mongoose";
 
 interface carInterface {  
   licencePlate: string
@@ -12,7 +11,6 @@ interface carOwnerInterface {
 }
 
 export interface LogParkingSpaceInterface extends Document {
-  parkingSpace: parkingSpaceInterface['_id']
   enteredAt: Date,
   leftAt?: Date
   car?: carInterface
@@ -20,9 +18,8 @@ export interface LogParkingSpaceInterface extends Document {
 }
 
 const LogParkingSpaceSchema: Schema = new Schema({
-  parkingSpace: { type: Schema.Types.ObjectId, ref: 'parkingSpace', required: true },
-  enteredAt: { type: Date, requered: true },
-  leftat: { type: Date },
+  enteredAt: { type: Date, requered: true, default: now },
+  leftAt: { type: Date },
   car: {
     licencePlate: { type: String },
     carModel: { type: String }

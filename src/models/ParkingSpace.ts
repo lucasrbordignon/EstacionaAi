@@ -1,4 +1,4 @@
-import { Document, model, Schema } from "mongoose";
+import { Document, model, now, Schema } from "mongoose";
 
 interface carInterface {  
   licencePlate: string
@@ -13,6 +13,7 @@ interface carOwnerInterface {
 export interface parkingSpaceInterface extends Document {
   number:  number
   isOccupied: boolean
+  enteredAt: Date,
   car: carInterface
   carOwner: carOwnerInterface
 }
@@ -20,6 +21,7 @@ export interface parkingSpaceInterface extends Document {
 const parkingSpaceSchema = new Schema({
   number:  { type: Number, required: true, unique: true },
   isOccupied:  { type: Boolean, default: false },
+  enteredAt: {type: Date, requered: true, default: now },
   car: {
     licencePlate: { type: String },
     carModel: { type: String }
@@ -29,7 +31,6 @@ const parkingSpaceSchema = new Schema({
     phone: { type: String }
   }
 })
-
 
 export default model<parkingSpaceInterface>('parkingSpace', parkingSpaceSchema)
 

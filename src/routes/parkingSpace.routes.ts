@@ -1,4 +1,5 @@
 import { App } from "../app"
+import LogParkingSpace from "../models/LogParkingSpace"
 import ParkingSpace from "../models/ParkingSpace"
 
 const app = new App().server
@@ -8,13 +9,15 @@ export const parkingSpaceRoutes = {
   getAllParkingSpace: app.get('/parkingSpace', async (req, res) => {
     try {
       const parkingSpaces = await ParkingSpace.find()
+      
       res.json(parkingSpaces.map((parkingSpace) => {
-        const { id, isOccupied} = parkingSpace
+        const { id, isOccupied, number} = parkingSpace
         const { licencePlate, carModel } = parkingSpace.car
         const { name, phone } = parkingSpace.carOwner
 
         return {
           id,
+          number,
           isOccupied,
           car: {
             licencePlate,
@@ -88,6 +91,33 @@ export const parkingSpaceRoutes = {
       }
 
       res.json(parkingSpace)
+
+    } catch (error) {
+      res.status(400).json({ message: error})
+    }
+  }), 
+
+  leftParkingSpaces: app.put('/parkingSpace/:id/left', async (req, res) => {
+    const { id } = req.params
+    const { number } = req.body
+
+    try {
+      const parkingSpace = await ParkingSpace.findById(id)
+
+      if (!parkingSpace) {
+        return res.status(404).json({ message: 'vaga não encontrada.' })        
+      }
+
+      const leftAt = new Date()
+      const {enteredAt, isOccupied, car, carOwner } = parkingSpace
+
+      const newParkingSpace = new LogParkingSpace({ _id: id, number, enteredAt, leftAt , isOccupied, car, carOwner } )
+      await newParkingSpace.save()
+
+      await ParkingSpace.findByIdAndUpdate(id, { number, isOccupied: false, car: {}, carOwner: {} }, { new: true })
+
+      res.json(newParkingSpace)
+
     } catch (error) {
       res.status(400).json({ message: error})
     }
